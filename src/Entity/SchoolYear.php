@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\SchoolYearRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SchoolYearRepository::class)]
@@ -21,6 +23,18 @@ class SchoolYear
 
     #[ORM\Column(type: 'datetime_immutable')]
     private $enddate_at;
+
+    #[ORM\OneToMany(mappedBy: 'schoolYear', targetEntity: Student::class)]
+    private $students;
+
+    #[ORM\ManyToMany(targetEntity: Teacher::class, inversedBy: 'schoolYears')]
+    private $teachers;
+
+    public function __construct()
+    {
+        $this->students = new ArrayCollection();
+        $this->teachers = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -59,6 +73,60 @@ class SchoolYear
     public function setEnddateAt(\DateTimeImmutable $enddate_at): self
     {
         $this->enddate_at = $enddate_at;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Student>
+     */
+    public function getStudents(): Collection
+    {
+        return $this->students;
+    }
+
+    public function addStudent(Student $student): self
+    {
+        if (!$this->students->contains($student)) {
+            $this->students[] = $student;
+            $student->setSchoolYear($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStudent(Student $student): self
+    {
+        if ($this->students->removeElement($student)) {
+            // set the owning side to null (unless already changed)
+            if ($student->getSchoolYear() === $this) {
+                $student->setSchoolYear(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Teacher>
+     */
+    public function getTeachers(): Collection
+    {
+        return $this->teachers;
+    }
+
+    public function addTeacher(Teacher $teacher): self
+    {
+        if (!$this->teachers->contains($teacher)) {
+            $this->teachers[] = $teacher;
+        }
+
+        return $this;
+    }
+
+    public function removeTeacher(Teacher $teacher): self
+    {
+        $this->teachers->removeElement($teacher);
 
         return $this;
     }

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\StudentRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: StudentRepository::class)]
@@ -19,17 +21,24 @@ class Student
     #[ORM\Column(type: 'string', length: 190)]
     private $lastname;
 
-    #[ORM\Column(type: 'datetime_immutable')]
-    private $created_at;
-
-    #[ORM\Column(type: 'datetime_immutable')]
-    private $updated_at;
-
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    private $deleted_at;
-
-    #[ORM\Column(type: 'boolean')]
+    #[ORM\Column(type: 'boolean', nullable: true)]
     private $success;
+
+    #[ORM\ManyToOne(targetEntity: SchoolYear::class, inversedBy: 'students')]
+    #[ORM\JoinColumn(nullable: false)]
+    private $schoolYear;
+
+    #[ORM\ManyToMany(targetEntity: Project::class, inversedBy: 'students')]
+    private $projects;
+
+    #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'students')]
+    private $tags;
+
+    public function __construct()
+    {
+        $this->projects = new ArrayCollection();
+        $this->tags = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -60,42 +69,6 @@ class Student
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->created_at;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $created_at): self
-    {
-        $this->created_at = $created_at;
-
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updated_at;
-    }
-
-    public function setUpdatedAt(\DateTimeImmutable $updated_at): self
-    {
-        $this->updated_at = $updated_at;
-
-        return $this;
-    }
-
-    public function getDeletedAt(): ?\DateTimeImmutable
-    {
-        return $this->deleted_at;
-    }
-
-    public function setDeletedAt(?\DateTimeImmutable $deleted_at): self
-    {
-        $this->deleted_at = $deleted_at;
-
-        return $this;
-    }
-
     public function isSuccess(): ?bool
     {
         return $this->success;
@@ -104,6 +77,66 @@ class Student
     public function setSuccess(bool $success): self
     {
         $this->success = $success;
+
+        return $this;
+    }
+
+    public function getSchoolYear(): ?SchoolYear
+    {
+        return $this->schoolYear;
+    }
+
+    public function setSchoolYear(?SchoolYear $schoolYear): self
+    {
+        $this->schoolYear = $schoolYear;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Project>
+     */
+    public function getProjects(): Collection
+    {
+        return $this->projects;
+    }
+
+    public function addProject(Project $project): self
+    {
+        if (!$this->projects->contains($project)) {
+            $this->projects[] = $project;
+        }
+
+        return $this;
+    }
+
+    public function removeProject(Project $project): self
+    {
+        $this->projects->removeElement($project);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Tag>
+     */
+    public function getTags(): Collection
+    {
+        return $this->tags;
+    }
+
+    public function addTag(Tag $tag): self
+    {
+        if (!$this->tags->contains($tag)) {
+            $this->tags[] = $tag;
+        }
+
+        return $this;
+    }
+
+    public function removeTag(Tag $tag): self
+    {
+        $this->tags->removeElement($tag);
 
         return $this;
     }
