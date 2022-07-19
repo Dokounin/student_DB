@@ -74,7 +74,7 @@ class Student
         return $this->success;
     }
 
-    public function setSuccess(bool $success): self
+    public function setSuccess(?bool $success): self
     {
         $this->success = $success;
 
